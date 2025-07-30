@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSP - Inteligencia Visoespacial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            width: 95%;
+            height: 80vh;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .game-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 15px 15px 0 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .score-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .welcome-screen {
+            padding: 15px 25px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 12px;
+            overflow-y: auto;
+        }
+
+        .welcome-screen h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: left;
+            line-height: 1.4;
+            border-left: 5px solid #667eea;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .instructions p {
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .continue-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            padding: 8px 16px;
+            font-size: 14px;
+            margin: 8px 0;
+            border-radius: 20px;
+        }
+
+        .continue-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .game-area {
+            padding: 8px 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow: hidden;
+        }
+
+        .timer-bar-container {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #333;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .timer-bar {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.05s linear;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .game-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: start;
+            flex: 1;
+        }
+
+        .pattern-section {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            height: fit-content;
+        }
+
+        .pattern-section h3 {
+            color: #667eea;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .pattern-display {
+            display: grid;
+            grid-template-columns: repeat(4, 35px);
+            gap: 3px;
+            justify-content: center;
+            margin: 6px 0;
+        }
+
+        .pattern-cell {
+            width: 35px;
+            height: 35px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        .pattern-cell.filled {
+            background: #667eea;
+            border-color: #4c63d2;
+        }
+
+        .transformation-display {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 8px;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        .transformation-arrow {
+            font-size: 18px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .options-section {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+
+        .options-section h3 {
+            color: #667eea;
+            margin-bottom: 6px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .option-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .option-card:hover {
+            border-color: #667eea;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .option-card.correct {
+            border-color: #4CAF50;
+            background: #d4edda;
+            animation: pulse-correct 0.6s ease;
+        }
+
+        .option-card.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            animation: shake 0.6s ease;
+        }
+
+        .option-card.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .option-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .lives-display {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .heart {
+            color: #dc3545;
+            font-size: 16px;
+            margin: 0 1px;
+        }
+
+        .heart.lost {
+            color: #ddd;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 8px 0;
+            min-height: 20px;
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        .feedback.correct {
+            color: #4CAF50;
+            background: #d4edda;
+        }
+
+        .feedback.incorrect {
+            color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .game-over-screen {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 10px 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .game-over-screen h2 {
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .registro-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .registro-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .registro-item h4 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .registro-item p {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .level-up-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .level-up-content {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .level-up-content h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .level-up-content p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .level-up-btn {
+            background: white;
+            color: #4CAF50;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .level-up-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255,255,255,0.3);
+        }
+
+        @keyframes pulse-correct {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 98%;
+                height: 95vh;
+                max-height: 95vh;
+            }
+            
+            .game-header {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+
+            .pattern-display {
+                grid-template-columns: repeat(4, 30px);
+                gap: 2px;
+            }
+            
+            .pattern-cell {
+                width: 30px;
+                height: 30px;
+            }
+            
+            .option-card {
+                padding: 6px;
+                font-size: 10px;
+                min-height: 45px;
+            }
+
+            .option-icon {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header del juego -->
+        <div class="game-header">
+            <div class="score-info">
+                <div>Nivel: <span id="current-level">1</span></div>
+                <div id="level-name">🌟 Explorador</div>
+            </div>
+            <div class="score-info">
+                <div>Puntos: <span id="score">0</span></div>
+                <div>Precisión: <span id="accuracy">0</span>%</div>
+            </div>
+            <div class="score-info">
+                <div>Vidas: <span id="lives">3</span></div>
+                <div class="lives-display">
+                    <span class="heart">❤️</span>
+                    <span class="heart">❤️</span>
+                    <span class="heart">❤️</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de bienvenida -->
+        <div id="welcome-screen" class="welcome-screen">
+            <h1>🧩 Inteligencia Visoespacial</h1>
+            <p style="font-size: 1.1em; color: #666; margin-bottom: 15px;">
+                Entrena tu capacidad de visualización espacial y rotación mental
+            </p>
+            
+            <div class="instructions">
+                <h3>🎯 Objetivo</h3>
+                <p>Observa el patrón de referencia y el patrón transformado. Identifica qué transformación se aplicó.</p>
+                
+                <h3>🎮 Transformaciones</h3>
+                <p><strong>↻ Rotar → 90°:</strong> Giro hacia la derecha<br>
+                <strong>↺ Rotar ← 90°:</strong> Giro hacia la izquierda<br>
+                <strong>↔️ Voltear H:</strong> Reflexión horizontal<br>
+                <strong>↕️ Voltear V:</strong> Reflexión vertical</p>
+                
+                <h3>📊 Puntuación</h3>
+                <p><strong>Correcto:</strong> +10 puntos + bonus tiempo<br>
+                <strong>Incorrecto:</strong> Pierdes una vida<br>
+                <strong>3 vidas</strong> antes de Game Over</p>
+                
+                <h3>🧠 Metacognición</h3>
+                <p>Después de cada respuesta, <strong>analiza tu proceso mental</strong> antes de continuar.</p>
+            </div>
+            
+            <button class="btn" onclick="startGame()" style="font-size: 18px; padding: 15px 30px; margin-top: 15px;">
+                🚀 Comenzar Entrenamiento
+            </button>
+        </div>
+
+        <!-- Área de juego -->
+        <div id="game-area" class="game-area hidden">
+            <!-- Barra de temporizador -->
+            <div class="timer-bar-container">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
+
+            <div class="game-content">
+                <div class="pattern-section">
+                    <h3>🔄 Transformación Aplicada</h3>
+                    <div class="transformation-display">
+                        <div>
+                            <p style="margin-bottom: 6px; font-weight: bold; color: #667eea; font-size: 12px;">Referencia</p>
+                            <div id="reference-pattern" class="pattern-display"></div>
+                        </div>
+                        <div class="transformation-arrow">→</div>
+                        <div>
+                            <p style="margin-bottom: 6px; font-weight: bold; color: #667eea; font-size: 12px;">Transformado</p>
+                            <div id="target-pattern" class="pattern-display"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón continuar -->
+                    <div style="text-align: center; margin-top: 8px;">
+                        <button id="continue-btn" class="btn continue-btn" onclick="continueToNext()" disabled>
+                            ➡️ Continuar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="options-section">
+                    <h3>🎯 Selecciona la Transformación</h3>
+                    <div class="options-grid">
+                        <div class="option-card" onclick="selectOption('rotateRight')">
+                            <div class="option-icon">↻</div>
+                            <div>Rotar → 90°</div>
+                        </div>
+                        <div class="option-card" onclick="selectOption('rotateLeft')">
+                            <div class="option-icon">↺</div>
+                            <div>Rotar ← 90°</div>
+                        </div>
+                        <div class="option-card" onclick="selectOption('flipH')">
+                            <div class="option-icon">↔️</div>
+                            <div>Voltear H</div>
+                        </div>
+                        <div class="option-card" onclick="selectOption('flipV')">
+                            <div class="option-icon">↕️</div>
+                            <div>Voltear V</div>
+                        </div>
+                    </div>
+                    <div id="feedback" class="feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Game Over -->
+        <div id="game-over-screen" class="game-over-screen hidden">
+            <h2>📊 Pantalla de Registro</h2>
+            <p style="font-size: 1.1em; margin-bottom: 15px;">
+                ¡Has agotado todos tus intentos! Aquí tienes tu registro de rendimiento:
+            </p>
+            
+            <div class="registro-stats">
+                <div class="registro-item">
+                    <h4>🏆 Puntos Acumulados</h4>
+                    <p id="final-score">0</p>
+                </div>
+                <div class="registro-item">
+                    <h4>📈 Nivel Alcanzado</h4>
+                    <p id="final-level">1</p>
+                </div>
+                <div class="registro-item">
+                    <h4>🌟 Rango Conseguido</h4>
+                    <p id="final-level-name">Explorador</p>
+                </div>
+                <div class="registro-item">
+                    <h4>🎯 Precisión Final</h4>
+                    <p id="final-accuracy">0%</p>
+                </div>
+            </div>
+            
+            <p style="font-size: 1em; margin: 15px 0; opacity: 0.9;">
+                Tu entrenamiento en inteligencia visoespacial ha terminado.<br>
+                ¡Sigue practicando para mejorar tu capacidad de visualización espacial!
+            </p>
+            
+            <div>
+                <button class="btn" onclick="resetGame()" style="background: linear-gradient(135deg, #4CAF50, #45a049); margin: 10px;">
+                    🎮 Jugar de Nuevo
+                </button>
+                <button class="btn" style="background: linear-gradient(135deg, #6c757d, #5a6268);" onclick="resetGame()">
+                    🔄 Intentar de Nuevo
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal de Nivel Superado -->
+        <div id="level-up-modal" class="level-up-modal hidden">
+            <div class="level-up-content">
+                <h2>🎉 ¡Nivel Superado!</h2>
+                <p>Has avanzado al <strong>Nivel <span id="new-level-number"></span></strong></p>
+                <p><span id="new-level-name"></span></p>
+                <button class="level-up-btn" onclick="continueLevelUp()">
+                    ✨ Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables del juego
+        let currentLevel = 1;
+        let score = 0;
+        let lives = 3;
+        let questionTimer = 15; // Tiempo por pregunta
+        let gameActive = false;
+        let currentPattern = [];
+        let correctTransform = '';
+        let totalQuestions = 0;
+        let correctAnswers = 0;
+        let questionInterval;
+        let questionStartTime;
+        let questionAnswered = false;
+
+        // Patrones base que cambian por nivel
+        const patterns = [
+            // Nivel 1
+            [
+                [1,0,1,0],
+                [0,1,0,1], 
+                [1,0,1,0],
+                [0,1,0,1]
+            ],
+            // Nivel 2
+            [
+                [1,1,0,0],
+                [1,1,0,0],
+                [0,0,1,1],
+                [0,0,1,1]
+            ],
+            // Nivel 3
+            [
+                [1,0,0,1],
+                [0,1,1,0],
+                [0,1,1,0],
+                [1,0,0,1]
+            ],
+            // Nivel 4
+            [
+                [1,1,1,0],
+                [0,0,1,0],
+                [0,0,1,0],
+                [0,0,1,1]
+            ],
+            // Nivel 5
+            [
+                [0,1,1,1],
+                [1,0,0,1],
+                [1,0,0,1],
+                [1,1,1,0]
+            ],
+            // Nivel 6
+            [
+                [1,0,0,0],
+                [1,0,0,0],
+                [1,0,0,0],
+                [1,1,1,1]
+            ],
+            // Nivel 7
+            [
+                [0,1,1,0],
+                [1,1,1,1],
+                [1,1,1,1],
+                [0,1,1,0]
+            ],
+            // Nivel 8
+            [
+                [1,0,0,0],
+                [0,1,0,0],
+                [0,0,1,0],
+                [0,0,0,1]
+            ]
+        ];
+
+        // Configuración de niveles
+        const levelConfig = {
+            1: { name: "🌟 Explorador", questionTime: 15 },
+            2: { name: "⚡ Aprendiz", questionTime: 14 },
+            3: { name: "🎯 Cazador", questionTime: 13 },
+            4: { name: "🚀 Aventurero", questionTime: 12 },
+            5: { name: "⭐ Maestro", questionTime: 11 },
+            6: { name: "🏆 Campeón", questionTime: 10 },
+            7: { name: "💎 Experto", questionTime: 9 },
+            8: { name: "🔥 Leyenda", questionTime: 8 },
+            9: { name: "👑 Héroe", questionTime: 7 },
+            10: { name: "🌈 Superestrella", questionTime: 6 }
+        };
+
+        function startGame() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('game-area').classList.remove('hidden');
+            
+            currentLevel = 1;
+            score = 0;
+            lives = 3;
+            totalQuestions = 0;
+            correctAnswers = 0;
+            gameActive = true;
+            questionAnswered = false;
+            
+            updateDisplay();
+            updateLivesDisplay();
+            generateQuestion();
+        }
+
+        function generateQuestion() {
+            questionAnswered = false;
+            enableOptions();
+            clearFeedback();
+            document.getElementById('continue-btn').disabled = true;
+            
+            // Generar patrón aleatorio diferente cada vez
+            currentPattern = generateRandomPattern();
+            
+            // Seleccionar transformación aleatoria (SIEMPRE hay transformación)
+            const transforms = ['rotateRight', 'rotateLeft', 'flipH', 'flipV'];
+            correctTransform = transforms[Math.floor(Math.random() * transforms.length)];
+            
+            // Aplicar transformación
+            const targetPattern = applyTransform(currentPattern, correctTransform);
+            
+            // Renderizar patrones
+            renderPattern('reference-pattern', currentPattern);
+            renderPattern('target-pattern', targetPattern);
+            
+            // Configurar timer según nivel
+            const config = levelConfig[currentLevel] || levelConfig[10];
+            questionTimer = config.questionTime;
+            
+            questionStartTime = Date.now();
+            startQuestionTimer();
+        }
+
+        function generateRandomPattern() {
+            // Crear patrón 4x4 aleatorio
+            const pattern = Array(4).fill().map(() => Array(4).fill(0));
+            
+            // Determinar número de celdas llenas (entre 4 y 10 para buena visibilidad)
+            const numFilled = 4 + Math.floor(Math.random() * 7);
+            
+            // Llenar celdas aleatoriamente
+            for (let i = 0; i < numFilled; i++) {
+                let row, col;
+                do {
+                    row = Math.floor(Math.random() * 4);
+                    col = Math.floor(Math.random() * 4);
+                } while (pattern[row][col] === 1);
+                
+                pattern[row][col] = 1;
+            }
+            
+            return pattern;
+        }
+
+        function startQuestionTimer() {
+            const config = levelConfig[currentLevel] || levelConfig[10];
+            questionTimer = config.questionTime;
+            const timerBar = document.getElementById('timer-bar');
+            
+            timerBar.style.width = '100%';
+            timerBar.style.background = '#4CAF50';
+            
+            questionInterval = setInterval(() => {
+                if (gameActive && !questionAnswered) {
+                    questionTimer -= 0.05;
+                    const percentage = Math.max(0, (questionTimer / config.questionTime) * 100);
+                    timerBar.style.width = percentage + '%';
+                    
+                    // Cambiar color según tiempo restante
+                    if (percentage > 60) {
+                        timerBar.style.background = '#4CAF50';
+                    } else if (percentage > 30) {
+                        timerBar.style.background = '#FF9800';
+                    } else {
+                        timerBar.style.background = '#f44336';
+                    }
+                    
+                    if (questionTimer <= 0) {
+                        handleTimeOut();
+                    }
+                }
+            }, 50);
+        }
+
+        function handleTimeOut() {
+            if (questionAnswered) return;
+            
+            questionAnswered = true;
+            clearInterval(questionInterval);
+            disableOptions();
+            
+            // Mostrar respuesta correcta
+            highlightCorrectAnswer();
+            
+            showFeedback('⏰ ¡Tiempo agotado! La respuesta era: ' + getTransformName(correctTransform), 'incorrect');
+            
+            lives--;
+            updateLivesDisplay();
+            totalQuestions++;
+            
+            if (lives <= 0) {
+                setTimeout(gameOver, 2000);
+            } else {
+                document.getElementById('continue-btn').disabled = false;
+            }
+        }
+
+        function selectOption(selectedTransform) {
+            if (!gameActive || questionAnswered) return;
+            
+            questionAnswered = true;
+            clearInterval(questionInterval);
+            disableOptions();
+            
+            const responseTime = Date.now() - questionStartTime;
+            totalQuestions++;
+            
+            if (selectedTransform === correctTransform) {
+                // Respuesta correcta
+                highlightSelectedOption(selectedTransform, true);
+                
+                correctAnswers++;
+                let points = 10;
+                
+                // Bonus por velocidad
+                if (responseTime < 3000) {
+                    points += 5;
+                }
+                
+                score += points;
+                updateDisplay();
+                showFeedback(`🎉 ¡Correcto! +${points} puntos`, 'correct');
+                
+                // Avanzar nivel cada 5 respuestas correctas
+                if (correctAnswers % 5 === 0 && correctAnswers > 0) {
+                    const newLevel = Math.min(10, currentLevel + 1);
+                    if (newLevel > currentLevel) {
+                        showLevelUpModal(newLevel);
+                        return; // No continuar automáticamente
+                    }
+                }
+                
+            } else {
+                // Respuesta incorrecta
+                highlightSelectedOption(selectedTransform, false);
+                highlightCorrectAnswer();
+                
+                lives--;
+                updateLivesDisplay();
+                showFeedback(`❌ Incorrecto. La respuesta era: ${getTransformName(correctTransform)}`, 'incorrect');
+                
+                if (lives <= 0) {
+                    setTimeout(gameOver, 2500);
+                    return;
+                }
+            }
+            
+            document.getElementById('continue-btn').disabled = false;
+        }
+
+        function highlightSelectedOption(transform, isCorrect) {
+            const options = document.querySelectorAll('.option-card');
+            const transformMap = { 'rotateRight': 0, 'rotateLeft': 1, 'flipH': 2, 'flipV': 3 };
+            const card = options[transformMap[transform]];
+            
+            card.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+
+        function highlightCorrectAnswer() {
+            const options = document.querySelectorAll('.option-card');
+            const transformMap = { 'rotateRight': 0, 'rotateLeft': 1, 'flipH': 2, 'flipV': 3 };
+            const correctCard = options[transformMap[correctTransform]];
+            
+            correctCard.classList.add('correct');
+        }
+
+        function getTransformName(transform) {
+            const names = {
+                'rotateRight': 'Rotar → 90°',
+                'rotateLeft': 'Rotar ← 90°',
+                'flipH': 'Voltear Horizontal',
+                'flipV': 'Voltear Vertical'
+            };
+            return names[transform];
+        }
+
+        function enableOptions() {
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('disabled', 'correct', 'incorrect');
+            });
+        }
+
+        function disableOptions() {
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.add('disabled');
+            });
+        }
+
+        function continueToNext() {
+            if (!gameActive) return;
+            
+            if (lives <= 0) {
+                gameOver();
+                return;
+            }
+            
+            generateQuestion();
+        }
+
+        function gameOver() {
+            gameActive = false;
+            clearInterval(questionInterval);
+            
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            const config = levelConfig[currentLevel] || levelConfig[10];
+            
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-level').textContent = currentLevel;
+            document.getElementById('final-level-name').textContent = config.name;
+            document.getElementById('final-accuracy').textContent = accuracy;
+            
+            document.getElementById('game-area').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.remove('hidden');
+        }
+
+        function showLevelUpModal(newLevel) {
+            currentLevel = newLevel;
+            const config = levelConfig[currentLevel] || levelConfig[10];
+            
+            document.getElementById('new-level-number').textContent = currentLevel;
+            document.getElementById('new-level-name').textContent = config.name;
+            document.getElementById('level-up-modal').classList.remove('hidden');
+            
+            // Pausar el juego
+            gameActive = false;
+        }
+
+        function continueLevelUp() {
+            document.getElementById('level-up-modal').classList.add('hidden');
+            gameActive = true;
+            updateDisplay();
+            
+            // Continuar con el botón continuar activado
+            document.getElementById('continue-btn').disabled = false;
+        }
+
+        function resetGame() {
+            clearInterval(questionInterval);
+            
+            // Resetear todas las variables
+            currentLevel = 1;
+            score = 0;
+            lives = 3;
+            totalQuestions = 0;
+            correctAnswers = 0;
+            gameActive = false;
+            questionAnswered = false;
+            
+            // Ocultar todas las pantallas
+            document.getElementById('game-area').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('level-up-modal').classList.add('hidden');
+            
+            // Mostrar pantalla de bienvenida
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            
+            updateDisplay();
+            updateLivesDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('current-level').textContent = currentLevel;
+            document.getElementById('score').textContent = score;
+            
+            const config = levelConfig[currentLevel] || levelConfig[10];
+            document.getElementById('level-name').textContent = config.name;
+            
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy;
+        }
+
+        function updateLivesDisplay() {
+            document.getElementById('lives').textContent = lives;
+            const hearts = document.querySelectorAll('.heart');
+            hearts.forEach((heart, index) => {
+                if (index < lives) {
+                    heart.classList.remove('lost');
+                } else {
+                    heart.classList.add('lost');
+                }
+            });
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+        }
+
+        function clearFeedback() {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+        }
+
+        function renderPattern(containerId, pattern) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            pattern.forEach(row => {
+                row.forEach(cell => {
+                    const div = document.createElement('div');
+                    div.className = `pattern-cell ${cell ? 'filled' : ''}`;
+                    container.appendChild(div);
+                });
+            });
+        }
+
+        function applyTransform(pattern, transformType) {
+            let result = pattern.map(row => row.slice());
+            
+            switch(transformType) {
+                case 'rotateRight':
+                    return rotate90Right(result);
+                case 'rotateLeft':
+                    return rotate90Left(result);
+                case 'flipH':
+                    return flipHorizontal(result);
+                case 'flipV':
+                    return flipVertical(result);
+                default:
+                    return rotate90Right(result); // Por defecto rotar derecha si algo falla
+            }
+        }
+
+        function rotate90Right(matrix) {
+            const N = matrix.length;
+            const result = Array.from({length: N}, () => Array(N).fill(0));
+            for (let i = 0; i < N; i++) {
+                for (let j = 0; j < N; j++) {
+                    result[j][N - 1 - i] = matrix[i][j];
+                }
+            }
+            return result;
+        }
+
+        function rotate90Left(matrix) {
+            const N = matrix.length;
+            const result = Array.from({length: N}, () => Array(N).fill(0));
+            for (let i = 0; i < N; i++) {
+                for (let j = 0; j < N; j++) {
+                    result[N - 1 - j][i] = matrix[i][j];
+                }
+            }
+            return result;
+        }
+
+        function flipHorizontal(matrix) {
+            return matrix.map(row => row.slice().reverse());
+        }
+
+        function flipVertical(matrix) {
+            return matrix.slice().reverse().map(row => row.slice());
+        }
+
+        // Inicialización
+        updateDisplay();
+        updateLivesDisplay();
+    </script>
+</body>
+</html>
