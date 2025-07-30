@@ -317,47 +317,63 @@
         .game-over-screen {
             background: linear-gradient(135deg, #dc3545, #c82333);
             color: white;
-            padding: 20px 25px;
+            padding: 15px 20px;
             border-radius: 15px;
             text-align: center;
-            margin: 10px 0;
+            margin: 8px 0;
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 15px;
+            justify-content: space-between;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: calc(80vh - 120px);
         }
 
         .game-over-screen h2 {
-            margin-bottom: 10px;
-            font-size: 1.8em;
+            margin-bottom: 8px;
+            font-size: 1.6em;
         }
 
         .registro-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 15px 0;
+            gap: 12px;
+            margin: 10px 0;
             text-align: center;
         }
 
         .registro-item {
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .registro-item h4 {
-            font-size: 1.2em;
-            margin-bottom: 8px;
+            font-size: 1.1em;
+            margin-bottom: 6px;
             color: #fff;
         }
 
         .registro-item p {
-            font-size: 1.5em;
+            font-size: 1.3em;
             font-weight: bold;
             color: #FFD700;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .game-over-buttons .btn {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            margin: 0;
         }
 
         .hidden {
@@ -572,41 +588,43 @@
 
         <!-- Pantalla de Game Over -->
         <div id="game-over-screen" class="game-over-screen hidden">
-            <h2>📊 Pantalla de Registro</h2>
-            <p style="font-size: 1.1em; margin-bottom: 15px;">
-                ¡Has agotado todos tus intentos! Aquí tienes tu registro de rendimiento:
-            </p>
-            
-            <div class="registro-stats">
-                <div class="registro-item">
-                    <h4>🏆 Puntos Acumulados</h4>
-                    <p id="final-score">0</p>
+            <div>
+                <h2>📊 Pantalla de Registro</h2>
+                <p style="font-size: 1em; margin-bottom: 10px;">
+                    ¡Has agotado todos tus intentos! Aquí tienes tu registro de rendimiento:
+                </p>
+                
+                <div class="registro-stats">
+                    <div class="registro-item">
+                        <h4>🏆 Puntos Acumulados</h4>
+                        <p id="final-score">0</p>
+                    </div>
+                    <div class="registro-item">
+                        <h4>📈 Nivel Alcanzado</h4>
+                        <p id="final-level">1</p>
+                    </div>
+                    <div class="registro-item">
+                        <h4>🌟 Rango Conseguido</h4>
+                        <p id="final-level-name">Explorador</p>
+                    </div>
+                    <div class="registro-item">
+                        <h4>🎯 Precisión Final</h4>
+                        <p id="final-accuracy">0%</p>
+                    </div>
                 </div>
-                <div class="registro-item">
-                    <h4>📈 Nivel Alcanzado</h4>
-                    <p id="final-level">1</p>
-                </div>
-                <div class="registro-item">
-                    <h4>🌟 Rango Conseguido</h4>
-                    <p id="final-level-name">Explorador</p>
-                </div>
-                <div class="registro-item">
-                    <h4>🎯 Precisión Final</h4>
-                    <p id="final-accuracy">0%</p>
-                </div>
+                
+                <p style="font-size: 0.9em; margin: 10px 0; opacity: 0.9;">
+                    Tu entrenamiento en inteligencia visoespacial ha terminado.<br>
+                    ¡Sigue practicando para mejorar tu capacidad de visualización espacial!
+                </p>
             </div>
             
-            <p style="font-size: 1em; margin: 15px 0; opacity: 0.9;">
-                Tu entrenamiento en inteligencia visoespacial ha terminado.<br>
-                ¡Sigue practicando para mejorar tu capacidad de visualización espacial!
-            </p>
-            
-            <div>
-                <button class="btn" onclick="resetGame()" style="background: linear-gradient(135deg, #4CAF50, #45a049); margin: 10px;">
+            <div class="game-over-buttons">
+                <button class="btn" onclick="resetGame()" style="background: linear-gradient(135deg, #4CAF50, #45a049);">
                     🎮 Jugar de Nuevo
                 </button>
-                <button class="btn" style="background: linear-gradient(135deg, #6c757d, #5a6268);" onclick="resetGame()">
-                    🔄 Intentar de Nuevo
+                <button class="btn" onclick="resetGame()" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    🔄 Volver al Inicio
                 </button>
             </div>
         </div>
